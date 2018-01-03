@@ -7,6 +7,7 @@ pub struct RbxItem {
     pub class_name: String,
     pub children: Vec<RbxItem>,
     pub properties: HashMap<String, RbxValue>,
+    pub route: Option<Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

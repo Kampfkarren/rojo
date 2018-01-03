@@ -151,7 +151,7 @@ pub fn start(config: Config, project: Project, plugin_chain: &'static PluginChai
 
                     for route in &read_request {
                         match vfs.read(&route) {
-                            Ok(v) => items.push(Some(v)),
+                            Ok(item) => items.push(Some((route.clone(), item))),
                             Err(_) => items.push(None),
                         }
                     }
@@ -161,9 +161,9 @@ pub fn start(config: Config, project: Project, plugin_chain: &'static PluginChai
 
                 let rbx_items = items
                     .iter()
-                    .map(|item| {
-                        match *item {
-                            Some(ref item) => plugin_chain.transform_file(item),
+                    .map(|entry| {
+                        match *entry {
+                            Some((ref route, ref item)) => plugin_chain.transform_file(route, item),
                             None => None,
                         }
                     })

@@ -26,7 +26,7 @@ impl ScriptPlugin {
 }
 
 impl Plugin for ScriptPlugin {
-    fn transform_file(&self, plugins: &PluginChain, vfs_item: &VfsItem) -> TransformFileResult {
+    fn transform_file(&self, plugins: &PluginChain, route: &Route, vfs_item: &VfsItem) -> TransformFileResult {
         match vfs_item {
             &VfsItem::File { ref contents, ref name } => {
                 let (class_name, rbx_name) = {
@@ -52,6 +52,7 @@ impl Plugin for ScriptPlugin {
                     class_name: class_name,
                     children: Vec::new(),
                     properties,
+                    route: Some(route.clone()),
                 }))
             },
             &VfsItem::Dir { ref children, ref name } => {
@@ -66,7 +67,7 @@ impl Plugin for ScriptPlugin {
                     }
                 };
 
-                let mut rbx_item = match self.transform_file(plugins, init_item) {
+                let mut rbx_item = match self.transform_file(plugins, route, init_item) {
                     TransformFileResult::Value(Some(item)) => item,
                     _ => {
                         eprintln!("Inconsistency detected in ScriptPlugin!");
@@ -82,7 +83,11 @@ impl Plugin for ScriptPlugin {
                         continue;
                     }
 
-                    match plugins.transform_file(child_item) {
+                    let mut child_route = Vec::new();
+                    child_route.extend_from_slice(route);
+                    child_route.push(child_name.clone());
+
+                    match plugins.transform_file(&child_route, child_item) {
                         Some(child_rbx_item) => {
                             rbx_item.children.push(child_rbx_item);
                         },

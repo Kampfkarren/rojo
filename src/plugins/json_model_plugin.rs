@@ -19,7 +19,7 @@ impl JsonModelPlugin {
 }
 
 impl Plugin for JsonModelPlugin {
-    fn transform_file(&self, _plugins: &PluginChain, vfs_item: &VfsItem) -> TransformFileResult {
+    fn transform_file(&self, _plugins: &PluginChain, route: &Route, vfs_item: &VfsItem) -> TransformFileResult {
         match vfs_item {
             &VfsItem::File { ref contents, ref name } => {
                 let rbx_name = match JSON_MODEL_PATTERN.captures(name) {
@@ -39,6 +39,8 @@ impl Plugin for JsonModelPlugin {
                 rbx_item.properties.insert("Name".to_string(), RbxValue::String {
                     value: rbx_name,
                 });
+
+                rbx_item.route = Some(route.clone());
 
                 TransformFileResult::Value(Some(rbx_item))
             },
